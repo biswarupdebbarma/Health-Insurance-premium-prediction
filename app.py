@@ -1,69 +1,65 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
 from pathlib import Path
 
-DATA_PATH = Path(__file__).resolve().parent / "health_insurance.csv"
+import joblib
+import pandas as pd
+import streamlit as st
+
+BASE_DIR = Path(__file__).resolve().parent
+DATA_PATH = BASE_DIR / "health_insurance.csv"
+MODEL_PATH = BASE_DIR / "model.pkl"
+
 
 @st.cache_data
 def load_data():
-    if not DATA_PATH.is_file():
-        raise FileNotFoundError(f"Dataset not found: {DATA_PATH.name}")
-    if DATA_PATH.stat().st_size == 0:
-        raise ValueError(f"{DATA_PATH.name} is empty. Add the dataset to the GitHub repository.")
-
+    if not DATA_PATH.is_file() or DATA_PATH.stat().st_size == 0:
+        raise FileNotFoundError("health_insurance.csv is missing or empty.")
     data = pd.read_csv(DATA_PATH)
     if data.empty or "charges" not in data.columns:
-        raise ValueError("Dataset must contain data and a 'charges' column.")
+        raise ValueError("CSV must contain data and a 'charges' column.")
     return data
 
 
-# Preprocess the data
-def preprocess_data(data):
-    # Example preprocessing steps
-    data = data.dropna()  # Drop missing values
-    data = pd.get_dummies(data, drop_first=True)  # One-hot encoding for categorical variables
-    return data
+@st.cache_resource
+def load_model():
+    if not MODEL_PATH.is_file():
+        raise FileNotFoundError("model.pkl is missing. Run create_model.py first.")
+    return joblib.load(MODEL_PATH)
 
-# Train the model
-def train_model(X, y):
-    model = RandomForestRegressor(n_estimators=100, random_state=42)
-    model.fit(X, y)
-    return model
 
-# Main function to run the app
 def main():
     st.title("Health Insurance Cost Prediction")
-    
-    # Load and preprocess data
-    data = load_data()
-    processed_data = preprocess_data(data)
-    
-    # Split the data into features and target
-    X = processed_data.drop('charges', axis=1)
-    y = processed_data['charges']
-    
-    # Split into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Train the model
-    model = train_model(X_train, y_train)
-    
-    # User input for prediction
-    st.sidebar.header("User Input")
+
+    try:
+        data = load_data()
+        model = load_model()
+    except Exception as error:
+        st.error(str(error))
+        st.stop()
+
+    features = data.drop(columns="charges")
+    st.sidebar.header("Enter your details")
     user_input = {}
-    for column in X.columns:
-        user_input[column] = st.sidebar.number_input(f"Enter {column}", value=0.0)
-    
-    input_df = pd.DataFrame([user_input])
-    
-    # Make prediction
+
+    for column in features.columns:
+        if pd.api.types.is_numeric_dtype(features[column]):
+            user_input[column] = st.sidebar.number_input(
+                column.replace("_", " ").title(),
+                value=float(features[column].median()),
+            )
+        else:
+            options = sorted(features[column].dropna().astype(str).unique())
+            if not options:
+                st.error(f"No available values for {column}.")
+                st.stop()
+            user_input[column] = st.sidebar.selectbox(
+                column.replace("_", " ").title(), options
+            )
+
     if st.sidebar.button("Predict"):
-        prediction = model.predict(input_df)
-        st.write(f"Predicted Charges: ${prediction[0]:,.2f}")
+        input_df = pd.DataFrame([user_input], columns=features.columns)
+        prediction = float(model.predict(input_df)[0])
+        st.success(f"Predicted charges: ${max(0, prediction):,.2f}")
+
 
 if __name__ == "__main__":
     main()
