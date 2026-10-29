@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 
 # Load the dataset
-@st.cache
+@st.cache_resource
 def load_data():
     data = pd.read_csv('health_insurance.csv')
     return data
