@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
-rom pathlib import Path
+from pathlib import Path
 
 DATA_PATH = Path(__file__).resolve().parent / "health_insurance.csv"
 
