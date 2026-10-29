@@ -4,12 +4,22 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
+rom pathlib import Path
 
-# Load the dataset
-@st.cache_resource
+DATA_PATH = Path(__file__).resolve().parent / "health_insurance.csv"
+
+@st.cache_data
 def load_data():
-    data = pd.read_csv('health_insurance.csv')
+    if not DATA_PATH.is_file():
+        raise FileNotFoundError(f"Dataset not found: {DATA_PATH.name}")
+    if DATA_PATH.stat().st_size == 0:
+        raise ValueError(f"{DATA_PATH.name} is empty. Add the dataset to the GitHub repository.")
+
+    data = pd.read_csv(DATA_PATH)
+    if data.empty or "charges" not in data.columns:
+        raise ValueError("Dataset must contain data and a 'charges' column.")
     return data
+
 
 # Preprocess the data
 def preprocess_data(data):
