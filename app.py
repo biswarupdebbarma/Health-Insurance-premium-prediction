@@ -11,6 +11,25 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_PATH = BASE_DIR / "health_insurance.csv"
 MODEL_PATH = BASE_DIR / "model.pkl"
 ILLUSTRATION_PATH = BASE_DIR / "life_cover_illustration.svg"
+FALLBACK_ILLUSTRATION = """<svg xmlns="http://www.w3.org/2000/svg" width="920" height="680" viewBox="0 0 920 680" fill="none">
+<circle cx="650" cy="331" r="278" fill="#DCEEEF"/><circle cx="650" cy="331" r="226" fill="#E8F3F2"/>
+<path d="M653 102 827 168v137c0 119-72 211-174 268-102-57-174-149-174-268V168l174-66Z" fill="#fff" stroke="#C7DFDC" stroke-width="8"/>
+<path d="M653 144 787 195v110c0 94-55 168-134 216-79-48-134-122-134-216V195l134-51Z" fill="#F4F9F8"/>
+<path d="M651 183c-18-29-62-23-70 11-10 42 70 84 70 84s80-42 70-84c-8-34-52-40-70-11Z" fill="#D9A95E"/>
+<path d="M372 561c0-104 59-170 133-170s133 66 133 170H372Z" fill="#2C6D70"/>
+<path d="M516 477c0-78 45-128 100-128s100 50 100 128v84H516v-84Z" fill="#91BDB7"/>
+<path d="M422 354c0-50 37-87 83-87s83 37 83 87-37 84-83 84-83-34-83-84Z" fill="#E7B991"/>
+<path d="M422 347c-6-56 29-99 83-99 42 0 74 28 82 68-19-11-40-18-64-18-37 0-67 16-101 49Z" fill="#344C53"/>
+<path d="M567 304c0-51 36-87 82-87 47 0 83 36 83 87s-36 82-83 82c-46 0-82-31-82-82Z" fill="#DDAE87"/>
+<path d="M567 296c-2-55 33-98 82-98 49 0 79 31 84 74-23-15-47-21-76-21-34 0-64 14-90 45Z" fill="#6B5144"/>
+<path d="M573 534c0-77 31-119 76-119s77 42 77 119v27H573v-27Z" fill="#F0C77D"/>
+<path d="M603 421c0-33 21-55 47-55s47 22 47 55-21 51-47 51-47-18-47-51Z" fill="#E9B58D"/>
+<path d="M602 416c-2-35 17-64 48-64 28 0 46 18 49 47-13-9-28-13-44-13-20 0-37 10-53 30Z" fill="#50423F"/>
+<path d="M290 567h485" stroke="#B7D3D0" stroke-width="8" stroke-linecap="round"/>
+<circle cx="786" cy="462" r="34" fill="#fff"/><path d="m772 462 10 10 19-21" stroke="#4E9388" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="429" cy="181" r="18" fill="#E9C379"/><circle cx="799" cy="225" r="11" fill="#7DAFA8"/>
+<path d="M288 260c35-30 76-46 122-47" stroke="#BCD9D5" stroke-width="5" stroke-linecap="round" stroke-dasharray="3 15"/>
+</svg>"""
 
 st.set_page_config(
     page_title="Evergreen | Insurance Cost Planner",
@@ -21,7 +40,12 @@ st.set_page_config(
 
 
 def apply_theme():
-    illustration = base64.b64encode(ILLUSTRATION_PATH.read_bytes()).decode("ascii")
+    illustration_bytes = (
+        ILLUSTRATION_PATH.read_bytes()
+        if ILLUSTRATION_PATH.is_file()
+        else FALLBACK_ILLUSTRATION.encode("utf-8")
+    )
+    illustration = base64.b64encode(illustration_bytes).decode("ascii")
     st.markdown(
         f"""
         <style>
