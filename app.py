@@ -260,7 +260,7 @@ def main():
     features = data.drop(columns="charges")
     st.markdown(
         """
-        <div class="brand"><span class="brand-mark">✦</span> Evergreen <span>·</span> Coverage studio</div>
+        <div class="brand"><span class="brand-mark">✦</span>  <span>·</span> </div>
         <section class="hero">
             <div class="eyebrow">A little clarity for the road ahead</div>
             <h1>Protect what matters.<br><span>Plan what’s next.</span></h1>
