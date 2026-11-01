@@ -32,7 +32,7 @@ FALLBACK_ILLUSTRATION = """<svg xmlns="http://www.w3.org/2000/svg" width="920" h
 </svg>"""
 
 st.set_page_config(
-    page_title="Evergreen | Insurance Cost Planner",
+    page_title="Biswarup | Insurance Cost Planner",
     page_icon="🌿",
     layout="wide",
     initial_sidebar_state="collapsed",
